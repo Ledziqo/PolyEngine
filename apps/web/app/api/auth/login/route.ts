@@ -6,9 +6,12 @@ export async function POST(request: NextRequest) {
   const email = String(formData.get("email") || "").trim();
   const password = String(formData.get("password") || "");
   const next = String(formData.get("next") || "/dashboard");
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "polyengine.io";
+  const proto = request.headers.get("x-forwarded-proto") || "http";
+  const baseUrl = `${proto}://${host}`;
 
   if (email.toLowerCase() !== OWNER_EMAIL.toLowerCase() || password !== OWNER_PASSWORD) {
-    const failedUrl = new URL("/login", request.url);
+    const failedUrl = new URL("/login", baseUrl);
     failedUrl.searchParams.set("error", "invalid");
     if (next.startsWith("/")) {
       failedUrl.searchParams.set("next", next);
@@ -16,7 +19,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(failedUrl, 303);
   }
 
-  const redirectUrl = new URL(next.startsWith("/") ? next : "/dashboard", request.url);
+  const redirectUrl = new URL(next.startsWith("/") ? next : "/dashboard", baseUrl);
   const response = NextResponse.redirect(redirectUrl, 303);
   response.cookies.set(AUTH_COOKIE, "active", {
     httpOnly: true,
