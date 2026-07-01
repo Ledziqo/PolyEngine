@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Logo } from "@/components/logo";
 
 export default async function LoginPage({
@@ -22,15 +21,15 @@ export default async function LoginPage({
             Invalid email or password.
           </div>
         ) : null}
-        <form action="/api/auth/login" method="post" className="mt-8 grid gap-4">
+        <form action="/auth/login" method="post" className="mt-8 grid gap-4" autoComplete="off">
           <input type="hidden" name="next" value={next} />
           <label className="grid gap-2 text-sm text-slate-300">
             Email
-            <input name="email" type="email" autoComplete="username" placeholder="Email address" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" />
+            <input name="email" type="email" autoComplete="off" placeholder="Email address" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" />
           </label>
           <label className="grid gap-2 text-sm text-slate-300">
             Password
-            <input name="password" type="password" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" />
+            <input name="password" type="password" autoComplete="new-password" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" />
           </label>
           <button className="mt-2 rounded-xl bg-cyanx px-4 py-3 text-center font-semibold text-black hover:bg-white">
             Enter terminal
