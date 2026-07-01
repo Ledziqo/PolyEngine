@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AUTH_COOKIE, OWNER_EMAIL, OWNER_PASSWORD } from "@/lib/auth";
+import { AUTH_COOKIE, OWNER_EMAIL, OWNER_PASSWORD, SESSION_COOKIE } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -21,12 +21,18 @@ export async function POST(request: NextRequest) {
 
   const redirectUrl = new URL(next.startsWith("/") ? next : "/dashboard", baseUrl);
   const response = NextResponse.redirect(redirectUrl, 303);
-  response.cookies.set(AUTH_COOKIE, "active", {
+  const cookieOptions = {
     httpOnly: true,
     sameSite: "lax",
     secure: proto === "https",
     path: "/",
     maxAge: 60 * 60 * 24 * 30
+  } as const;
+
+  response.cookies.set(AUTH_COOKIE, "active", cookieOptions);
+  response.cookies.set(SESSION_COOKIE, "active", {
+    ...cookieOptions,
+    httpOnly: false
   });
 
   return response;

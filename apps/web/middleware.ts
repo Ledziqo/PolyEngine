@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (request.cookies.get("polyengine_owner")?.value === "active") {
+  if (request.cookies.get("polyengine_owner")?.value === "active" || request.cookies.get("polyengine_session")?.value === "active") {
     return NextResponse.next();
   }
 

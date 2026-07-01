@@ -73,7 +73,7 @@ export default function LandingPage() {
         </div>
         <div className="relative">
           <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-cyanx/20 via-violetx/10 to-greenx/20 blur-2xl" />
-          <div className="relative rounded-[2rem] border border-slate-200 bg-slate-950 p-2 shadow-2xl shadow-slate-950/25">
+          <div className="relative rounded-[2rem] border border-white bg-white/60 p-2 shadow-2xl shadow-slate-950/10 backdrop-blur">
             <TerminalPreview />
           </div>
         </div>
