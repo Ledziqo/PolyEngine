@@ -6,6 +6,7 @@ import {
   Activity,
   BarChart3,
   Bot,
+  Crown,
   Gauge,
   History,
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
   Settings,
   Sparkles,
   Target,
+  Users,
   Zap
 } from "lucide-react";
 import { Logo } from "./logo";
@@ -21,9 +23,12 @@ import { Logo } from "./logo";
 const nav = [
   ["Dashboard", "/dashboard", LayoutDashboard],
   ["Markets", "/markets", BarChart3],
+  ["Market Sections", "/market-sections", Gauge],
   ["AI Opportunities", "/opportunities", Sparkles],
   ["Easy Wins", "/easy-wins", Target],
   ["Fast Wins", "/fast-wins", Zap],
+  ["Top Traders", "/traders", Crown],
+  ["Copy Signals", "/copy-signals", Users],
   ["Portfolio", "/portfolio", LineChart],
   ["Trade History", "/history", History],
   ["Live Bot Log", "/bot-log", Bot],

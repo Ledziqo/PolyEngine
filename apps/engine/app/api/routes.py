@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from app.services.demo import demo_opportunities, demo_status
+from app.services.demo import demo_copy_signals, demo_market_sections, demo_opportunities, demo_status, demo_traders
 from app.services.polymarket import PolymarketClient
 from app.workers.live_engine import LiveEngine
 
@@ -31,6 +31,27 @@ async def live_tick() -> dict:
 @router.get("/opportunities")
 def opportunities() -> list[dict]:
     return demo_opportunities()
+
+
+@router.get("/market-sections")
+def market_sections() -> list[dict]:
+    return demo_market_sections()
+
+
+@router.get("/traders")
+def traders(period: str = "monthly") -> dict:
+    return {"period": period, "traders": demo_traders()}
+
+
+@router.get("/traders/{wallet}")
+def trader(wallet: str) -> dict:
+    matches = [item for item in demo_traders() if item["wallet"] == wallet]
+    return {"trader": matches[0] if matches else None, "copy_signals": demo_copy_signals()}
+
+
+@router.get("/copy-signals")
+def copy_signals() -> list[dict]:
+    return demo_copy_signals()
 
 
 @router.get("/polymarket/markets")
