@@ -7,7 +7,7 @@ export default function AccessPendingPage() {
         <p className="text-sm uppercase tracking-[0.28em] text-cyanx">Request received</p>
         <h1 className="mt-4 text-4xl font-semibold">Subscription approval required</h1>
         <p className="mt-5 leading-7 text-slate-300">
-          Please message <span className="text-cyanx">@Aesliex</span> on Telegram or WhatsApp to buy a subscription and activate your account.
+          Please message <span className="text-cyanx">@Aesliex</span> on Telegram to request a subscription and activate your private access.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <a className="rounded-full bg-cyanx px-6 py-3 font-semibold text-black" href="https://t.me/Aesliex">Message Telegram</a>

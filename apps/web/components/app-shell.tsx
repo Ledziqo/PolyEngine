@@ -78,9 +78,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <p className="text-xs uppercase tracking-[0.28em] text-cyanx">PolyEngine Terminal</p>
                 <h1 className="text-lg font-semibold text-white sm:text-2xl">AI paper-trading command center</h1>
               </div>
-              <Link href="/login" className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 hover:bg-white/5">
+              <Link href="/api/auth/logout" className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 hover:bg-white/5">
                 <LogOut className="h-4 w-4" />
-                Exit
+                Logout
               </Link>
             </div>
           </header>
