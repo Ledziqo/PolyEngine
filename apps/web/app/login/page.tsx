@@ -26,7 +26,7 @@ export default async function LoginPage({
           <input type="hidden" name="next" value={next} />
           <label className="grid gap-2 text-sm text-slate-300">
             Email
-            <input name="email" type="email" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" defaultValue="Aesliexx@gmail.com" />
+            <input name="email" type="email" autoComplete="username" placeholder="Owner email" className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 outline-none focus:border-cyanx" />
           </label>
           <label className="grid gap-2 text-sm text-slate-300">
             Password
