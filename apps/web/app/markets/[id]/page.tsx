@@ -5,6 +5,8 @@ import { getMarkets } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+const num = (value: unknown) => Number(value || 0);
+
 export default async function MarketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const markets = await getMarkets();
@@ -31,9 +33,9 @@ export default async function MarketDetailPage({ params }: { params: Promise<{ i
                   <p className="text-sm text-slate-500">{outcome.name}</p>
                   <RatingBadge rating={outcome.rating} />
                 </div>
-                <p className="mt-3 text-4xl font-semibold">{outcome.price.toFixed(2)}</p>
-                <p className={(outcome.edge || 0) >= 0 ? "mt-2 text-greenx" : "mt-2 text-redx"}>{(outcome.edge * 100).toFixed(1)}% edge</p>
-                <p className="mt-2 text-sm text-slate-400">{outcome.confidence}% confidence | {(outcome.spread * 100).toFixed(1)}% spread</p>
+                <p className="mt-3 text-4xl font-semibold">{num(outcome.price).toFixed(2)}</p>
+                <p className={num(outcome.edge) >= 0 ? "mt-2 text-greenx" : "mt-2 text-redx"}>{(num(outcome.edge) * 100).toFixed(1)}% edge</p>
+                <p className="mt-2 text-sm text-slate-400">{num(outcome.confidence)}% confidence | {(num(outcome.spread) * 100).toFixed(1)}% spread</p>
               </div>
             ))}
           </div>

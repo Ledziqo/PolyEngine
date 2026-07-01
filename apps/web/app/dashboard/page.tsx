@@ -6,6 +6,8 @@ import { pnlCurve } from "@/lib/demo-data";
 
 export const dynamic = "force-dynamic";
 
+const num = (value: unknown) => Number(value || 0);
+
 export default async function DashboardPage() {
   const [status, portfolio, botLogs, opportunities] = await Promise.all([getLiveStatus(), getPortfolio(), getLogs(), getOpportunities()]);
   const bot = (status as any).bot || {};
@@ -82,7 +84,7 @@ export default async function DashboardPage() {
               {opportunities.map((item) => (
                 <tr key={item.market} className="border-t border-white/10">
                   <td className="py-4"><RatingBadge rating={item.rating} /></td>
-                  <td>{item.market}</td><td className="text-cyanx">{item.name}</td><td><Badge tone={item.bot_action === "Enter" ? "green" : "violet"}>{item.bot_action}</Badge></td><td>{item.price.toFixed(2)}</td><td>{Math.round(item.fair_probability * 100)}%</td><td className="text-greenx">{(item.edge * 100).toFixed(1)}%</td><td>{item.confidence}%</td>
+                  <td>{item.market}</td><td className="text-cyanx">{item.name}</td><td><Badge tone={item.bot_action === "Enter" ? "green" : "violet"}>{item.bot_action}</Badge></td><td>{num(item.price).toFixed(2)}</td><td>{Math.round(num(item.fair_probability) * 100)}%</td><td className="text-greenx">{(num(item.edge) * 100).toFixed(1)}%</td><td>{num(item.confidence)}%</td>
                 </tr>
               ))}
               {!opportunities.length && (

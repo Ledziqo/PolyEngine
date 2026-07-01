@@ -4,6 +4,7 @@ import { Badge, Metric, Panel } from "@/components/ui";
 import { getMarketSections, getMarkets } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
+const num = (value: unknown) => Number(value || 0);
 
 export default async function MarketSectionsPage() {
   const [marketSections, markets] = await Promise.all([getMarketSections(), getMarkets()]);
@@ -38,7 +39,7 @@ export default async function MarketSectionsPage() {
                   <h3 className="font-semibold">{section.name}</h3>
                   <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">{section.signal}</p>
                 </div>
-                <Badge tone={section.pulse.startsWith("+3") || section.pulse.startsWith("+2") ? "green" : "cyan"}>{section.pulse}</Badge>
+                <Badge tone={String(section.pulse || "").startsWith("+3") || String(section.pulse || "").startsWith("+2") ? "green" : "cyan"}>{section.pulse || "Live"}</Badge>
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
                 <span className="text-slate-500">Markets</span><span className="text-right">{section.markets}</span>
@@ -61,14 +62,15 @@ export default async function MarketSectionsPage() {
                 <tr key={market.id || market.question} className="border-t border-white/10">
                   <td className="py-4"><Badge tone="violet">{market.section}</Badge></td>
                   <td className="font-medium">{market.question}</td>
-                  <td>{market.best_outcome?.price?.toFixed(2) || "-"}</td>
-                  <td className={(market.best_outcome?.edge || 0) >= 0 ? "text-greenx" : "text-redx"}>{market.best_outcome ? `${(market.best_outcome.edge * 100).toFixed(1)}%` : "-"}</td>
+                  <td>{market.best_outcome ? num(market.best_outcome.price).toFixed(2) : "-"}</td>
+                  <td className={num(market.best_outcome?.edge) >= 0 ? "text-greenx" : "text-redx"}>{market.best_outcome ? `${(num(market.best_outcome.edge) * 100).toFixed(1)}%` : "-"}</td>
                   <td>${Math.round(market.liquidity || 0).toLocaleString()}</td>
                   <td>${Math.round(market.volume || 0).toLocaleString()}</td>
                   <td>{market.best_outcome?.confidence || 0}%</td>
                   <td>{market.preferred_pick || "-"}</td>
                 </tr>
               ))}
+              {!sectionMarkets.length && <tr><td colSpan={8} className="py-8 text-slate-400">No section movers yet. Sync live markets first.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -13,8 +13,7 @@ export function LiveLogStream({ initial }: { initial: LogItem[] }) {
   const [logs, setLogs] = useState(initial);
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-    const source = new EventSource(`${baseUrl}/api/bot-log/stream`);
+    const source = new EventSource("/api/bot-log/stream");
     source.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data) as LogItem;

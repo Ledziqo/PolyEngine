@@ -12,9 +12,7 @@ export function BotControls() {
   async function send(action: BotControlAction) {
     setLoading(action);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-      const endpoint = process.env.NEXT_PUBLIC_ENGINE_URL ? `${baseUrl}/api/bot/control` : "/api/bot/control";
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/bot/control", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action })
@@ -26,7 +24,7 @@ export function BotControls() {
     } catch {
       const fallback = action === "enable" ? "enabled" : action === "pause" ? "paused" : "stopped";
       setState(fallback);
-      setMessage("Local UI updated. Engine API will persist this on VPS.");
+      setMessage("Engine API did not confirm the change. Check that the engine container is running.");
     } finally {
       setLoading(null);
     }

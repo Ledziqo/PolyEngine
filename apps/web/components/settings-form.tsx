@@ -47,8 +47,7 @@ export function SettingsForm({ initial }: { initial: Partial<SettingsPayload> })
       btc5m_min_confidence: Number(formData.get("btc5m_min_confidence") || 72)
     };
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-      const response = await fetch(`${baseUrl}/api/bot/settings`, {
+      const response = await fetch("/api/bot/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -56,7 +55,7 @@ export function SettingsForm({ initial }: { initial: Partial<SettingsPayload> })
       if (!response.ok) throw new Error("Save failed");
       setMessage("Settings saved to engine.");
     } catch {
-      setMessage("Could not reach engine from browser. Check NEXT_PUBLIC_ENGINE_URL after deployment.");
+      setMessage("Could not reach engine. Make sure the engine container is running.");
     } finally {
       setSaving(false);
     }
@@ -136,8 +135,7 @@ function LiveCredentialsForm() {
       polymarket_api_passphrase: String(formData.get("polymarket_api_passphrase") || "")
     };
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-      const response = await fetch(`${baseUrl}/api/live-credentials`, {
+      const response = await fetch("/api/live-credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -146,7 +144,7 @@ function LiveCredentialsForm() {
       const result = await response.json();
       setMessage(`Saved ${result.saved?.length || 0} credential fields. Missing: ${result.configured ? Object.entries(result.configured).filter(([, ok]) => !ok).map(([key]) => key).join(", ") || "none" : "refresh status"}.`);
     } catch {
-      setMessage("Could not save credentials. Check the engine URL and APP_SECRET_KEY.");
+      setMessage("Could not save credentials. Check that the engine container is running and APP_SECRET_KEY is set.");
     } finally {
       setSaving(false);
     }

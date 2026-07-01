@@ -4,7 +4,7 @@ services:
       context: ./apps/web
     environment:
       ENGINE_INTERNAL_URL: ${ENGINE_INTERNAL_URL:-http://engine:8000}
-      NEXT_PUBLIC_ENGINE_URL: ${NEXT_PUBLIC_ENGINE_URL:-http://localhost:8000}
+      NEXT_PUBLIC_ENGINE_URL: ${NEXT_PUBLIC_ENGINE_URL:-}
     ports:
       - "3000:3000"
     depends_on:

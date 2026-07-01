@@ -4,6 +4,8 @@ import { getPortfolio } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+const num = (value: unknown) => Number(value || 0);
+
 export default async function PortfolioPage() {
   const portfolio = await getPortfolio() as any;
   const positions = portfolio.positions || [];
@@ -23,8 +25,9 @@ export default async function PortfolioPage() {
             <thead className="text-slate-500"><tr><th className="py-3">Market</th><th>Outcome</th><th>Size</th><th>Avg Fill</th><th>Current</th><th>PnL</th></tr></thead>
             <tbody>
               {positions.map((position: any) => (
-                <tr key={position.id} className="border-t border-white/10"><td className="py-4">{position.market}</td><td>{position.outcome}</td><td>${Math.round(position.cost_basis)}</td><td>{position.avg_price.toFixed(2)}</td><td>{position.current_price.toFixed(2)}</td><td className={position.unrealized_pnl >= 0 ? "text-greenx" : "text-redx"}>{position.unrealized_pnl.toFixed(2)}</td></tr>
+                <tr key={position.id} className="border-t border-white/10"><td className="py-4">{position.market}</td><td>{position.outcome}</td><td>${Math.round(num(position.cost_basis))}</td><td>{num(position.avg_price).toFixed(2)}</td><td>{num(position.current_price).toFixed(2)}</td><td className={num(position.unrealized_pnl) >= 0 ? "text-greenx" : "text-redx"}>{num(position.unrealized_pnl).toFixed(2)}</td></tr>
               ))}
+              {!positions.length && <tr><td colSpan={6} className="py-8 text-slate-400">No open positions yet. Turn the bot on after live sync to let it find qualifying trades.</td></tr>}
             </tbody>
           </table>
         </div>

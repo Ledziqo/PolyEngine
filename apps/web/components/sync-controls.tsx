@@ -9,13 +9,12 @@ export function SyncControls() {
   async function syncAll() {
     setLoading(true);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-      const response = await fetch(`${baseUrl}/api/sync/all`, { method: "POST" });
+      const response = await fetch("/api/sync/all", { method: "POST" });
       if (!response.ok) throw new Error("Sync failed");
       const payload = await response.json();
       setMessage(`Synced ${payload.markets?.synced || 0} markets, ${payload.order_books?.synced || 0} order books, scored ${payload.score?.scored || 0} outcomes.`);
     } catch {
-      setMessage("Could not reach engine from browser. The worker will still sync on VPS if Docker is running.");
+      setMessage("Could not reach engine. Make sure the engine and worker containers are running.");
     } finally {
       setLoading(false);
     }

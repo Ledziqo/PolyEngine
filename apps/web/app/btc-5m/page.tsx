@@ -1,9 +1,12 @@
+import { AppShell } from "@/components/app-shell";
 import { Badge, Metric, Panel } from "@/components/ui";
 import { getBtc5m } from "@/lib/api";
 
-function pct(value: number) {
-  return `${(value * 100).toFixed(1)}%`;
+function pct(value: unknown) {
+  return `${(Number(value || 0) * 100).toFixed(1)}%`;
 }
+
+const num = (value: unknown) => Number(value || 0);
 
 export default async function BtcFiveMinutePage() {
   const payload = await getBtc5m() as any;
@@ -11,6 +14,7 @@ export default async function BtcFiveMinutePage() {
   const active = windows[0];
 
   return (
+    <AppShell>
     <div className="space-y-6">
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <Panel>
@@ -28,8 +32,8 @@ export default async function BtcFiveMinutePage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Metric label="Pick" value={active.recommended_side} tone={active.recommended_side === "UP" ? "green" : active.recommended_side === "DOWN" ? "red" : "violet"} />
               <Metric label="Confidence" value={`${active.confidence}%`} tone="cyan" />
-              <Metric label="Expected edge" value={pct(active.expected_edge || 0)} tone="green" />
-              <Metric label="Max entry" value={`${(active.max_entry_price || 0).toFixed(2)}`} tone="amber" />
+              <Metric label="Expected edge" value={pct(active.expected_edge)} tone="green" />
+              <Metric label="Max entry" value={`${num(active.max_entry_price).toFixed(2)}`} tone="amber" />
             </div>
           ) : (
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-slate-400">
@@ -40,10 +44,10 @@ export default async function BtcFiveMinutePage() {
         <Panel>
           <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Live reference</p>
           <div className="mt-5 space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-slate-400">Price to beat</span><b>${(active?.price_to_beat || 0).toFixed(2)}</b></div>
-            <div className="flex justify-between"><span className="text-slate-400">BTC spot</span><b>${(active?.spot_price || 0).toFixed(2)}</b></div>
-            <div className="flex justify-between"><span className="text-slate-400">Up odds</span><b>{pct(active?.up_price || 0)}</b></div>
-            <div className="flex justify-between"><span className="text-slate-400">Down odds</span><b>{pct(active?.down_price || 0)}</b></div>
+            <div className="flex justify-between"><span className="text-slate-400">Price to beat</span><b>${num(active?.price_to_beat).toFixed(2)}</b></div>
+            <div className="flex justify-between"><span className="text-slate-400">BTC spot</span><b>${num(active?.spot_price).toFixed(2)}</b></div>
+            <div className="flex justify-between"><span className="text-slate-400">Up odds</span><b>{pct(active?.up_price)}</b></div>
+            <div className="flex justify-between"><span className="text-slate-400">Down odds</span><b>{pct(active?.down_price)}</b></div>
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-slate-300">{active?.why || "Waiting for signal."}</div>
           </div>
         </Panel>
@@ -72,18 +76,20 @@ export default async function BtcFiveMinutePage() {
                   <td className="py-4">{window.slug}</td>
                   <td><Badge tone={window.recommended_side === "UP" ? "green" : window.recommended_side === "DOWN" ? "red" : "violet"}>{window.recommended_side}</Badge></td>
                   <td>{window.confidence}%</td>
-                  <td>{pct(window.expected_edge || 0)}</td>
-                  <td>{pct(window.up_price || 0)}</td>
-                  <td>{pct(window.down_price || 0)}</td>
+                  <td>{pct(window.expected_edge)}</td>
+                  <td>{pct(window.up_price)}</td>
+                  <td>{pct(window.down_price)}</td>
                   <td>{window.status}</td>
                   <td className="max-w-md text-slate-400">{window.why}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {!windows.length && <p className="py-8 text-sm text-slate-400">No BTC 5m windows synced yet.</p>}
         </div>
       </Panel>
     </div>
+    </AppShell>
   );
 }
 

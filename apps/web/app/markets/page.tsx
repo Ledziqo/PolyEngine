@@ -4,6 +4,7 @@ import { getMarkets } from "@/lib/api";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+const num = (value: unknown) => Number(value || 0);
 
 export default async function MarketsPage() {
   const markets = await getMarkets();
@@ -31,12 +32,12 @@ export default async function MarketsPage() {
                   <td className="font-semibold text-cyanx">{item.preferred_pick || best?.name || "-"}</td>
                   <td><Badge tone={item.bot_action === "Enter" ? "green" : item.bot_action === "Skip" ? "red" : "violet"}>{item.bot_action || "Watch"}</Badge></td>
                   <td>{item.outcomes && item.outcomes.length > 2 ? "Multi" : "Yes/No"}</td>
-                  <td>{best ? best.price.toFixed(2) : "-"}</td>
-                  <td>{best ? `${Math.round(best.fair_probability * 100)}%` : "-"}</td>
-                  <td className={(best?.edge || 0) >= 0 ? "text-greenx" : "text-redx"}>{best ? `${(best.edge * 100).toFixed(1)}%` : "-"}</td>
-                  <td>{best?.confidence || 0}%</td>
+                  <td>{best ? num(best.price).toFixed(2) : "-"}</td>
+                  <td>{best ? `${Math.round(num(best.fair_probability) * 100)}%` : "-"}</td>
+                  <td className={num(best?.edge) >= 0 ? "text-greenx" : "text-redx"}>{best ? `${(num(best.edge) * 100).toFixed(1)}%` : "-"}</td>
+                  <td>{num(best?.confidence)}%</td>
                   <td>${Math.round(item.liquidity || best?.liquidity || 0).toLocaleString()}</td>
-                  <td>{best ? `${(best.spread * 100).toFixed(1)}%` : "-"}</td>
+                  <td>{best ? `${(num(best.spread) * 100).toFixed(1)}%` : "-"}</td>
                   <td><Badge tone="green">Live</Badge></td>
                 </tr>
               )})}

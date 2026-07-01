@@ -4,13 +4,14 @@ import { Badge, Metric, Panel } from "@/components/ui";
 import { getCopySignals, getTraders } from "@/lib/api";
 
 function money(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number(value || 0));
 }
 
 export const dynamic = "force-dynamic";
 
 export default async function TradersPage() {
-  const [{ traders }, traderPositions] = await Promise.all([getTraders() as any, getCopySignals() as any]);
+  const [traderPayload, traderPositions] = await Promise.all([getTraders() as any, getCopySignals() as any]);
+  const traders = Array.isArray(traderPayload.traders) ? traderPayload.traders : [];
 
   return (
     <AppShell>
@@ -57,6 +58,7 @@ export default async function TradersPage() {
                   <td>{trader.source_quality}</td>
                 </tr>
               ))}
+              {!traders.length && <tr><td colSpan={11} className="py-8 text-slate-400">No trader leaderboard data yet. Add Bitquery/API credentials or run trader sync.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -73,6 +75,7 @@ export default async function TradersPage() {
                   <td className="py-4">{signal.trader}</td><td>{signal.market}</td><td>{signal.side}</td><td>{signal.size}</td><td>{signal.entry}</td><td>{signal.current}</td><td className="text-greenx">{signal.pnl || "-"}</td><td><Badge tone="cyan">{signal.status}</Badge></td>
                 </tr>
               ))}
+              {!traderPositions.length && <tr><td colSpan={8} className="py-8 text-slate-400">No copy signals yet.</td></tr>}
             </tbody>
           </table>
         </div>

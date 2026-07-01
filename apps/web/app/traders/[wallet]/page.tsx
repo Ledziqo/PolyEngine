@@ -5,7 +5,7 @@ import { Badge, Metric, Panel } from "@/components/ui";
 import { getCopySignals, getTraders } from "@/lib/api";
 
 function money(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(Number(value || 0));
 }
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,8 @@ export default async function TraderDetailPage({
   params: Promise<{ wallet: string }>;
 }) {
   const { wallet } = await params;
-  const [{ traders }, copySignals] = await Promise.all([getTraders() as any, getCopySignals() as any]);
+  const [traderPayload, copySignals] = await Promise.all([getTraders() as any, getCopySignals() as any]);
+  const traders = Array.isArray(traderPayload.traders) ? traderPayload.traders : [];
   const trader = traders.find((item: any) => item.wallet === wallet);
   if (!trader) notFound();
 
@@ -27,7 +28,7 @@ export default async function TraderDetailPage({
       <Link href="/traders" className="text-sm text-cyanx">Back to leaderboard</Link>
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Badge tone="green">Copy score {trader.copyScore}</Badge>
+          <Badge tone="green">Copy score {trader.copy_score || 0}</Badge>
           <h2 className="mt-4 text-4xl font-semibold">{trader.name}</h2>
           <p className="mt-2 text-slate-400">{trader.wallet}</p>
         </div>

@@ -4,6 +4,7 @@ import { Badge, Metric, Panel } from "@/components/ui";
 import { getOpportunities, getSectionMarkets } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
+const num = (value: unknown) => Number(value || 0);
 
 export default async function MarketSectionDetailPage({
   params
@@ -18,7 +19,7 @@ export default async function MarketSectionDetailPage({
     <AppShell>
       <Link href="/market-sections" className="text-sm text-cyanx">Back to sections</Link>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label={`${sectionName} volume`} value={`$${Math.round(fallbackRows.reduce((sum, item) => sum + (item.volume || 0), 0)).toLocaleString()}`} tone="cyan" />
+        <Metric label={`${sectionName} volume`} value={`$${Math.round(fallbackRows.reduce((sum, item) => sum + num(item.volume), 0)).toLocaleString()}`} tone="cyan" />
         <Metric label="Markets" value={String(fallbackRows.length)} tone="violet" />
         <Metric label="Strong/Best" value={String(fallbackRows.filter((item) => ["Strong", "Best"].includes(item.rating)).length)} tone="green" />
         <Metric label="Signal" value="Live" tone="amber" />
@@ -35,14 +36,15 @@ export default async function MarketSectionDetailPage({
                 {fallbackRows.map((market) => (
                   <tr key={market.id || market.question} className="border-t border-white/10">
                     <td className="py-4 font-medium">{market.question}</td>
-                    <td>{market.best_outcome?.price?.toFixed(2) || "-"}</td>
-                    <td className={(market.best_outcome?.edge || 0) >= 0 ? "text-greenx" : "text-redx"}>{market.best_outcome ? `${(market.best_outcome.edge * 100).toFixed(1)}%` : "-"}</td>
+                    <td>{market.best_outcome ? num(market.best_outcome.price).toFixed(2) : "-"}</td>
+                    <td className={num(market.best_outcome?.edge) >= 0 ? "text-greenx" : "text-redx"}>{market.best_outcome ? `${(num(market.best_outcome.edge) * 100).toFixed(1)}%` : "-"}</td>
                     <td>${Math.round(market.liquidity || 0).toLocaleString()}</td>
                     <td>${Math.round(market.volume || 0).toLocaleString()}</td>
                     <td>{market.best_outcome?.confidence || 0}%</td>
                     <td>{market.preferred_pick || "-"}</td>
                   </tr>
                 ))}
+                {!fallbackRows.length && <tr><td colSpan={7} className="py-8 text-slate-400">No markets synced for this section yet.</td></tr>}
               </tbody>
             </table>
           </div>

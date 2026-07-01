@@ -2,6 +2,7 @@ import { AppShell } from "@/components/app-shell";
 import { Badge, Panel, RatingBadge } from "@/components/ui";
 import { getOpportunities } from "@/lib/api";
 const ratingOrder = ["Avoid", "Weak", "Watch", "Good", "Strong", "Best"];
+const num = (value: unknown) => Number(value || 0);
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +30,10 @@ export default async function OpportunitiesPage() {
               </div>
               <div className="mt-5 grid gap-3 text-sm sm:grid-cols-5">
                 <span>Pick <b className="text-cyanx">{item.name}</b></span>
-                <span>Price <b>{item.price.toFixed(2)}</b></span>
-                <span>Fair <b>{Math.round(item.fair_probability * 100)}%</b></span>
-                <span>Edge <b className="text-greenx">{(item.edge * 100).toFixed(1)}%</b></span>
-                <span>Confidence <b>{item.confidence}%</b></span>
+                <span>Price <b>{num(item.price).toFixed(2)}</b></span>
+                <span>Fair <b>{Math.round(num(item.fair_probability) * 100)}%</b></span>
+                <span>Edge <b className="text-greenx">{(num(item.edge) * 100).toFixed(1)}%</b></span>
+                <span>Confidence <b>{num(item.confidence)}%</b></span>
               </div>
             </div>
           ))}
