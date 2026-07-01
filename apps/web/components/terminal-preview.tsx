@@ -1,4 +1,3 @@
-import { botLogs, opportunities } from "@/lib/demo-data";
 import { Badge, Panel } from "./ui";
 
 export function TerminalPreview() {
@@ -6,6 +5,16 @@ export function TerminalPreview() {
     { label: "BTC 5m", value: "DOWN", tone: "amber", meta: "72s left" },
     { label: "Mode", value: "REAL + SIM", tone: "cyan", meta: "armed" },
     { label: "Rating", value: "BEST", tone: "green", meta: "91%" }
+  ];
+  const opportunities = [
+    { market: "BTC 5m active window", outcome: "Down", confidence: 91, price: 0.52, edge: 8 },
+    { market: "High-volume Polymarket setup", outcome: "Best pick", confidence: 84, price: 0.61, edge: 5 }
+  ];
+  const botLogs = [
+    ["14:08:22", "SCAN", "Checked live high-volume markets", "cyan"],
+    ["14:08:24", "SCORE", "Ranked outcomes by bot probability", "violet"],
+    ["14:08:25", "CHECK", "Liquidity, spread, and risk rules passed", "green"],
+    ["14:08:26", "ENTER", "Bot prepared execution and simulator mirror", "green"]
   ];
 
   return (
@@ -31,7 +40,7 @@ export function TerminalPreview() {
           ))}
         </div>
         <div className="mt-5 grid gap-3">
-          {opportunities.slice(0, 2).map((item) => (
+          {opportunities.map((item) => (
             <div key={item.market} className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -54,7 +63,7 @@ export function TerminalPreview() {
           {botLogs.slice(0, 4).map(([time, type, text, tone]) => (
             <div key={`${time}-${type}`} className="flex gap-3 py-1 text-slate-300">
               <span className="text-slate-600">{time}</span>
-              <span className={`w-14 text-${tone === "green" ? "greenx" : tone === "violet" ? "violet-300" : "cyanx"}`}>{type}</span>
+                  <span className={tone === "green" ? "w-14 text-greenx" : tone === "violet" ? "w-14 text-violet-300" : "w-14 text-cyanx"}>{type}</span>
               <span>{text}</span>
             </div>
           ))}

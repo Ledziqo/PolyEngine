@@ -3,7 +3,8 @@ import { AUTH_COOKIE } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const proto = request.headers.get("x-forwarded-proto") || "http";
-  const response = NextResponse.redirect(new URL("/login", request.url), 303);
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "polyengine.io";
+  const response = NextResponse.redirect(new URL("/login", `${proto}://${host}`), 303);
   response.cookies.set(AUTH_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",

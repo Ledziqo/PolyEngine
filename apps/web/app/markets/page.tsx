@@ -40,6 +40,13 @@ export default async function MarketsPage() {
                   <td><Badge tone="green">Live</Badge></td>
                 </tr>
               )})}
+              {!markets.length && (
+                <tr>
+                  <td colSpan={12} className="py-8 text-slate-400">
+                    No real Polymarket markets synced yet. Open Settings and run Sync Polymarket Data, or wait for the VPS worker.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

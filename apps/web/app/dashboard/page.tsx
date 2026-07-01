@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { BotControls } from "@/components/bot-controls";
-import { Badge, Metric, Panel, RatingBadge } from "@/components/ui";
+import { Metric, Panel, RatingBadge, Badge } from "@/components/ui";
 import { getLiveStatus, getLogs, getOpportunities, getPortfolio } from "@/lib/api";
 import { pnlCurve } from "@/lib/demo-data";
 
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
       <Panel className="mt-6 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Best opportunities</h2>
-          <Badge tone="cyan">Demo feed</Badge>
+          <Badge tone="cyan">Live engine</Badge>
         </div>
         <div className="mt-5 overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-sm">
@@ -85,6 +85,13 @@ export default async function DashboardPage() {
                   <td>{item.market}</td><td className="text-cyanx">{item.name}</td><td><Badge tone={item.bot_action === "Enter" ? "green" : "violet"}>{item.bot_action}</Badge></td><td>{item.price.toFixed(2)}</td><td>{Math.round(item.fair_probability * 100)}%</td><td className="text-greenx">{(item.edge * 100).toFixed(1)}%</td><td>{item.confidence}%</td>
                 </tr>
               ))}
+              {!opportunities.length && (
+                <tr>
+                  <td colSpan={8} className="py-8 text-slate-400">
+                    No real opportunities yet. Run Sync Polymarket Data or wait for the worker to collect markets and order books.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

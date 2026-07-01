@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { Badge, Panel, RatingBadge } from "@/components/ui";
 import { getOpportunities } from "@/lib/api";
-import { ratingOrder } from "@/lib/demo-data";
+const ratingOrder = ["Avoid", "Weak", "Watch", "Good", "Strong", "Best"];
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +36,11 @@ export default async function OpportunitiesPage() {
               </div>
             </div>
           ))}
+          {!ranked.length && (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5 text-slate-400">
+              No real AI opportunities yet. Sync Polymarket markets/order books first, then run scoring.
+            </div>
+          )}
         </div>
       </Panel>
     </AppShell>

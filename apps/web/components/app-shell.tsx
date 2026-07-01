@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-cyanx">PolyEngine Terminal</p>
-                <h1 className="text-lg font-semibold text-white sm:text-2xl">AI paper-trading command center</h1>
+                <h1 className="text-lg font-semibold text-white sm:text-2xl">AI bot-trading command center</h1>
               </div>
               <Link href="/api/auth/logout" className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300 hover:bg-white/5">
                 <LogOut className="h-4 w-4" />

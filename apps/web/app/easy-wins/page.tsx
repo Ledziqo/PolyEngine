@@ -11,7 +11,7 @@ export default async function EasyWinsPage() {
     <AppShell>
       <Panel>
         <h2 className="text-2xl font-semibold">Easy Wins</h2>
-        <p className="mt-2 text-slate-400">Strong and Best trade candidates with strong execution conditions.</p>
+        <p className="mt-2 text-slate-400">The bot's highest-probability opportunities, ranked by confidence, edge, liquidity, and execution quality.</p>
         <div className="mt-6 grid gap-4">
           {wins.map((item) => (
             <div key={item.market} className="rounded-2xl border border-white/10 bg-black/20 p-5">
@@ -23,6 +23,11 @@ export default async function EasyWinsPage() {
               <div className="mt-4 text-sm text-slate-300">Preferred pick: <b className="text-cyanx">{item.name}</b> | Bot action: <b>{item.bot_action}</b></div>
             </div>
           ))}
+          {!wins.length && (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5 text-slate-400">
+              No Easy Wins yet. The bot will only show real high-probability setups after live market sync and scoring.
+            </div>
+          )}
         </div>
       </Panel>
     </AppShell>

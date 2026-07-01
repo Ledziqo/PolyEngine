@@ -1,13 +1,3 @@
-import {
-  botLogs,
-  botState,
-  marketSections,
-  markets,
-  opportunities,
-  topTraders,
-  traderPositions
-} from "./demo-data";
-
 const ENGINE_URL = process.env.ENGINE_INTERNAL_URL || process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
 
 async function getJson<T>(path: string, fallback: T): Promise<T> {
@@ -52,61 +42,28 @@ export type ApiOutcome = {
 };
 
 export async function getMarkets() {
-  const fallback = markets.map((item, index) => ({
-    id: index + 1,
-    question: item.market,
-    rating: item.rating,
-    preferred_pick: item.preferredPick,
-    bot_action: item.botAction,
-    liquidity: Number(item.liquidity.replace(/[$kM,]/g, "")) || 0,
-    best_outcome: {
-      name: item.preferredPick,
-      price: Number(item.price.split(" ")[0]) || 0,
-      fair_probability: Number(item.fairProbability.replace("%", "")) / 100,
-      edge: Number(item.edge.replace("%", "")) / 100,
-      confidence: item.confidence,
-      rating: item.rating,
-      bot_action: item.botAction,
-      liquidity: 0,
-      spread: Number(item.spread.replace("%", "")) / 100,
-      score_breakdown: item.scores
-    }
-  }));
-  return getJson<ApiMarket[]>("/api/markets", fallback);
+  return getJson<ApiMarket[]>("/api/markets", []);
 }
 
 export async function getOpportunities(mode?: "easy" | "fast") {
   const path = mode === "easy" ? "/api/opportunities/easy-wins" : mode === "fast" ? "/api/opportunities/fast-wins" : "/api/opportunities";
-  const fallback = opportunities.map((item) => ({
-    name: item.preferredPick,
-    market: item.market,
-    price: item.price,
-    fair_probability: item.fair,
-    edge: item.edge / 100,
-    confidence: item.confidence,
-    rating: item.rating,
-    bot_action: item.botAction,
-    liquidity: item.liquidity,
-    spread: item.spread / 100,
-    why: item.why
-  }));
-  return getJson<ApiOutcome[]>(path, fallback);
+  return getJson<ApiOutcome[]>(path, []);
 }
 
 export async function getLiveStatus() {
-  return getJson("/api/live/status", { markets: 0, open_positions: 0, stale: true, bot: botState });
+  return getJson<Record<string, any>>("/api/live/status", { markets: 0, open_positions: 0, stale: true, bot: { enabled: false, state: "paused", risk_mode: "Balanced", minimum_rating: "Strong" } });
 }
 
 export async function getPortfolio() {
-  return getJson("/api/portfolio", { balance: 10000, realized_pnl: 0, unrealized_pnl: 0, exposure: 0, positions: [], trades: [] });
+  return getJson<Record<string, any>>("/api/portfolio", { balance: 10000, realized_pnl: 0, unrealized_pnl: 0, exposure: 0, positions: [], trades: [] });
 }
 
 export async function getLogs() {
-  return getJson("/api/bot-log", botLogs.map(([time, type, message, tone], id) => ({ id, created_at: time, type, message, level: tone })));
+  return getJson<Array<Record<string, any>>>("/api/bot-log", []);
 }
 
 export async function getMarketSections() {
-  return getJson("/api/market-sections", marketSections);
+  return getJson<Array<Record<string, any>>>("/api/market-sections", []);
 }
 
 export async function getSectionMarkets(slug: string) {
@@ -115,26 +72,25 @@ export async function getSectionMarkets(slug: string) {
 }
 
 export async function getTraders() {
-  const fallback = { period: "monthly", traders: topTraders.map((item) => ({ ...item, win_rate: item.winRate, gain_loss: item.gainLoss, active_value: item.activeValue, copy_score: item.copyScore, source_quality: "estimated" })) };
-  return getJson("/api/traders", fallback);
+  return getJson<Record<string, any>>("/api/traders", { period: "monthly", traders: [] });
 }
 
 export async function getCopySignals() {
-  return getJson("/api/copy-signals", traderPositions.map(([trader, market, side, size, entry, current, pnl, status]) => ({ trader, market, side, size, entry, current, pnl, status, copy_score: 75, source_quality: "estimated" })));
+  return getJson<Array<Record<string, any>>>("/api/copy-signals", []);
 }
 
 export async function getBtc5m() {
-  return getJson("/api/btc-5m", { windows: [] });
+  return getJson<Record<string, any>>("/api/btc-5m", { windows: [] });
 }
 
 export async function getBacktests() {
-  return getJson("/api/backtests", []);
+  return getJson<Array<Record<string, any>>>("/api/backtests", []);
 }
 
 export async function getModelStatus() {
-  return getJson("/api/model/status", { active: false, version: "rule-fallback", training_rows: 0, validation_auc: 0, precision: 0, recall: 0 });
+  return getJson<Record<string, any>>("/api/model/status", { active: false, version: "rule-fallback", training_rows: 0, validation_auc: 0, precision: 0, recall: 0 });
 }
 
 export async function getLiveOrders() {
-  return getJson("/api/live-orders", []);
+  return getJson<Array<Record<string, any>>>("/api/live-orders", []);
 }
