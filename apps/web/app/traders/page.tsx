@@ -1,19 +1,23 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Metric, Panel } from "@/components/ui";
-import { topTraders, traderPositions } from "@/lib/demo-data";
+import { getCopySignals, getTraders } from "@/lib/api";
 
 function money(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 }
 
-export default function TradersPage() {
+export const dynamic = "force-dynamic";
+
+export default async function TradersPage() {
+  const [{ traders }, traderPositions] = await Promise.all([getTraders() as any, getCopySignals() as any]);
+
   return (
     <AppShell>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Metric label="Traders tracked" value="12,480" tone="cyan" />
-        <Metric label="Top monthly PnL" value={money(topTraders[0].pnl)} tone="green" />
-        <Metric label="Best copy score" value={`${Math.max(...topTraders.map((t) => t.copyScore))}`} tone="violet" />
+        <Metric label="Top monthly PnL" value={money(traders[0]?.pnl || 0)} tone="green" />
+        <Metric label="Best copy score" value={`${Math.max(0, ...traders.map((t: any) => t.copy_score || 0))}`} tone="violet" />
         <Metric label="Open whale value" value="$3.13M" tone="amber" />
       </div>
 
@@ -35,7 +39,7 @@ export default function TradersPage() {
               <tr><th className="py-3">Rank</th><th>Trader</th><th>PnL</th><th>ROI</th><th>Volume</th><th>Win rate</th><th>G/L</th><th>Positions</th><th>Active value</th><th>Copy score</th><th>Specialty</th></tr>
             </thead>
             <tbody>
-              {topTraders.map((trader) => (
+              {traders.map((trader: any) => (
                 <tr key={trader.wallet} className="border-t border-white/10">
                   <td className="py-4 text-slate-400">#{trader.rank}</td>
                   <td>
@@ -45,12 +49,12 @@ export default function TradersPage() {
                   <td className="text-greenx">{money(trader.pnl)}</td>
                   <td>{trader.roi}%</td>
                   <td>{money(trader.volume)}</td>
-                  <td>{trader.winRate}%</td>
-                  <td>{trader.gainLoss}x</td>
-                  <td>{trader.positions}</td>
-                  <td>{money(trader.activeValue)}</td>
-                  <td><Badge tone={trader.copyScore > 90 ? "green" : "cyan"}>{trader.copyScore}</Badge></td>
-                  <td>{trader.specialty}</td>
+                  <td>{trader.win_rate}%</td>
+                  <td>{trader.gain_loss}x</td>
+                  <td>{trader.positions || "-"}</td>
+                  <td>{money(trader.active_value)}</td>
+                  <td><Badge tone={trader.copy_score > 90 ? "green" : "cyan"}>{trader.copy_score}</Badge></td>
+                  <td>{trader.source_quality}</td>
                 </tr>
               ))}
             </tbody>
@@ -64,9 +68,9 @@ export default function TradersPage() {
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="text-slate-500"><tr><th className="py-3">Trader</th><th>Market</th><th>Side</th><th>Size</th><th>Entry</th><th>Current</th><th>PnL</th><th>Status</th></tr></thead>
             <tbody>
-              {traderPositions.map(([trader, market, side, size, entry, current, pnl, status]) => (
-                <tr key={`${trader}-${market}`} className="border-t border-white/10">
-                  <td className="py-4">{trader}</td><td>{market}</td><td>{side}</td><td>{size}</td><td>{entry}</td><td>{current}</td><td className="text-greenx">{pnl}</td><td><Badge tone="cyan">{status}</Badge></td>
+              {traderPositions.map((signal: any) => (
+                <tr key={`${signal.trader}-${signal.market}`} className="border-t border-white/10">
+                  <td className="py-4">{signal.trader}</td><td>{signal.market}</td><td>{signal.side}</td><td>{signal.size}</td><td>{signal.entry}</td><td>{signal.current}</td><td className="text-greenx">{signal.pnl || "-"}</td><td><Badge tone="cyan">{signal.status}</Badge></td>
                 </tr>
               ))}
             </tbody>

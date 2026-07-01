@@ -1,8 +1,13 @@
 import { AppShell } from "@/components/app-shell";
+import { LiveLogStream } from "@/components/live-log-stream";
 import { Badge, Panel } from "@/components/ui";
-import { botLogs } from "@/lib/demo-data";
+import { getLogs } from "@/lib/api";
 
-export default function BotLogPage() {
+export const dynamic = "force-dynamic";
+
+export default async function BotLogPage() {
+  const botLogs = await getLogs();
+
   return (
     <AppShell>
       <Panel>
@@ -13,15 +18,7 @@ export default function BotLogPage() {
           </div>
           <Badge tone="green">Streaming demo</Badge>
         </div>
-        <div className="mt-6 space-y-3 font-mono text-sm">
-          {botLogs.concat(botLogs).map(([time, type, text], index) => (
-            <div key={`${time}-${type}-${index}`} className="grid gap-2 rounded-2xl border border-white/10 bg-black/25 p-4 sm:grid-cols-[90px_90px_1fr]">
-              <span className="text-slate-500">{time}</span>
-              <span className="text-cyanx">{type}</span>
-              <span className="text-slate-300">{text}</span>
-            </div>
-          ))}
-        </div>
+        <LiveLogStream initial={botLogs} />
       </Panel>
     </AppShell>
   );

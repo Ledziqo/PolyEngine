@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "PolyEngine | AI Polymarket Paper Trading",
-  description: "Live AI terminal for Polymarket analysis, automatic paper trading, and copy-wallet signals."
+  description: "Live AI terminal for Polymarket analysis, autonomous bot trading, and copy-wallet signals."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -13,3 +13,4 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
+

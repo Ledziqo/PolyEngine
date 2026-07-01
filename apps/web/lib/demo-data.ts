@@ -1,25 +1,31 @@
 export const opportunities = [
   {
-    grade: "Strong Entry",
+    grade: "Best",
     market: "Fed rate cut by September?",
     outcome: "Yes",
     price: 0.42,
     fair: 0.58,
     edge: 16.0,
     confidence: 87,
+    rating: "Best",
+    botAction: "Enter",
+    preferredPick: "YES",
     liquidity: 182400,
     spread: 1.2,
     ends: "18h",
     why: "High volume, tight spread, fair probability above market price."
   },
   {
-    grade: "Easy Win",
+    grade: "Strong",
     market: "Will BTC close above $120k Friday?",
     outcome: "No",
     price: 0.63,
     fair: 0.74,
     edge: 11.0,
     confidence: 82,
+    rating: "Strong",
+    botAction: "Enter",
+    preferredPick: "NO",
     liquidity: 94000,
     spread: 1.7,
     ends: "42h",
@@ -33,6 +39,9 @@ export const opportunities = [
     fair: 0.37,
     edge: 6.0,
     confidence: 71,
+    rating: "Watch",
+    botAction: "Watch",
+    preferredPick: "Arsenal",
     liquidity: 231000,
     spread: 2.9,
     ends: "64d",
@@ -50,6 +59,14 @@ export const botLogs = [
   ["14:13:41", "ERROR", "Wallet signal sync delayed by API rate limit", "red"]
 ];
 
+export const botState = {
+  enabled: false,
+  mode: "Balanced",
+  minimumRating: "Strong",
+  latestAction: "Standing by until owner turns bot on",
+  emergencyStop: false
+};
+
 export const pnlCurve = [
   { t: "09:00", value: 10000 },
   { t: "10:00", value: 10084 },
@@ -59,11 +76,84 @@ export const pnlCurve = [
   { t: "14:00", value: 10291 }
 ];
 
+export const ratingOrder = ["Avoid", "Weak", "Watch", "Good", "Strong", "Best"];
+
 export const markets = [
-  ["Fed rate cut by September?", "Yes/No", "0.42 / 0.59", "$182.4k", "1.2%", "Live"],
-  ["BTC above $120k Friday?", "Yes/No", "0.36 / 0.63", "$94.0k", "1.7%", "Live"],
-  ["US CPI below forecast?", "Yes/No", "0.51 / 0.50", "$71.5k", "2.1%", "Syncing"],
-  ["Premier League winner", "Multi", "0.31 best", "$231.0k", "2.9%", "Live"]
+  {
+    market: "Fed rate cut by September?",
+    type: "Yes/No",
+    price: "0.42 / 0.59",
+    liquidity: "$182.4k",
+    spread: "1.2%",
+    status: "Live",
+    rating: "Best",
+    preferredPick: "YES",
+    botAction: "Enter",
+    confidence: 87,
+    edge: "+16.0%",
+    fairProbability: "58%",
+    scores: { liquidity: 92, spread: 94, expiry: 82, momentum: 78, depth: 91, wallet: 66, risk: 84 }
+  },
+  {
+    market: "BTC above $120k Friday?",
+    type: "Yes/No",
+    price: "0.36 / 0.63",
+    liquidity: "$94.0k",
+    spread: "1.7%",
+    status: "Live",
+    rating: "Strong",
+    preferredPick: "NO",
+    botAction: "Enter",
+    confidence: 82,
+    edge: "+11.0%",
+    fairProbability: "74%",
+    scores: { liquidity: 84, spread: 88, expiry: 76, momentum: 71, depth: 80, wallet: 72, risk: 79 }
+  },
+  {
+    market: "US CPI below forecast?",
+    type: "Yes/No",
+    price: "0.51 / 0.50",
+    liquidity: "$71.5k",
+    spread: "2.1%",
+    status: "Syncing",
+    rating: "Good",
+    preferredPick: "YES",
+    botAction: "Hold",
+    confidence: 77,
+    edge: "+7.3%",
+    fairProbability: "59%",
+    scores: { liquidity: 75, spread: 74, expiry: 80, momentum: 73, depth: 69, wallet: 58, risk: 70 }
+  },
+  {
+    market: "Premier League winner",
+    type: "Multi",
+    price: "0.31 best",
+    liquidity: "$231.0k",
+    spread: "2.9%",
+    status: "Live",
+    rating: "Watch",
+    preferredPick: "Arsenal",
+    botAction: "Watch",
+    confidence: 71,
+    edge: "+6.0%",
+    fairProbability: "37%",
+    scores: { liquidity: 88, spread: 61, expiry: 48, momentum: 58, depth: 72, wallet: 62, risk: 63 }
+  },
+  {
+    market: "Will a surprise cabinet resignation happen this week?",
+    type: "Yes/No",
+    price: "0.18 / 0.83",
+    liquidity: "$8.4k",
+    spread: "8.7%",
+    status: "Live",
+    rating: "Avoid",
+    preferredPick: "NO",
+    botAction: "Skip",
+    confidence: 42,
+    edge: "-2.4%",
+    fairProbability: "80%",
+    scores: { liquidity: 22, spread: 18, expiry: 41, momentum: 33, depth: 19, wallet: 12, risk: 21 }
+  }
 ];
 
 export const marketSections = [
@@ -218,3 +308,4 @@ export const traderPositions = [
   ["CandleHammerDrums", "Fed rate cut by September?", "YES", "$48,000", "0.42", "0.45", "+7.1%", "Watching"],
   ["Oneger", "Will the Iranian regime fall?", "NO", "$134,280", "0.67", "0.71", "+6.0%", "Open"]
 ];
+

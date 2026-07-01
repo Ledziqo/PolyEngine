@@ -32,3 +32,18 @@ export function Badge({ children, tone = "cyan" }: { children: React.ReactNode; 
 
   return <span className={clsx("rounded-full border px-3 py-1 text-xs", tones[tone])}>{children}</span>;
 }
+
+export function RatingBadge({ rating }: { rating: string }) {
+  const tone =
+    rating === "Best" || rating === "Strong"
+      ? "green"
+      : rating === "Good"
+        ? "cyan"
+        : rating === "Watch"
+          ? "violet"
+          : rating === "Weak"
+            ? "amber"
+            : "red";
+
+  return <Badge tone={tone}>{rating}</Badge>;
+}

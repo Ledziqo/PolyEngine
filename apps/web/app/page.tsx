@@ -10,10 +10,10 @@ type Feature = [string, string, ComponentType<{ className?: string }>];
 const features: Feature[] = [
   ["Live market pulse", "Continuous Polymarket sync for prices, depth, liquidity, and expiry.", RadioTower],
   ["AI opportunity scoring", "Confidence, edge, fair probability, and skip reasons in one terminal.", BrainCircuit],
-  ["Automatic paper bot", "Fake-money execution with realistic fills, slippage, and risk controls.", Bot],
+  ["Autonomous bot trading", "Let the engine scan, decide, and execute while the 1:1 simulator mirrors every move for testing.", Bot],
   ["Copy-wallet signals", "Track wallet activity and use it as signal context, not blind hype.", WalletCards],
   ["Risk firewall", "Exposure, spread, liquidity, and stale-data rules before every entry.", ShieldCheck],
-  ["Easy/Fast Wins", "High-confidence opportunities and soon-ending setups ranked clearly.", Sparkles]
+  ["Easy + Fast Wins", "Separate views for highest-probability trades and soon-ending markets ranked by bot conviction.", Sparkles]
 ];
 
 export default function LandingPage() {
@@ -27,19 +27,24 @@ export default function LandingPage() {
           <a href="#signals" className="hover:text-white">Signals</a>
           <a href="#access" className="hover:text-white">Access</a>
         </nav>
-        <Link href="/request-access" className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black hover:bg-cyanx">
-          Request access
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/login" className="hidden rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/5 sm:inline-flex">
+            Login
+          </Link>
+          <Link href="/request-access" className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black hover:bg-cyanx">
+            Request access
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl items-center gap-10 px-4 pb-16 pt-8 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <div>
-          <Badge tone="cyan">AI terminal for Polymarket paper trading</Badge>
+          <Badge tone="cyan">Autonomous Polymarket trading engine</Badge>
           <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight sm:text-6xl lg:text-7xl">
-            Watch markets move. Let the engine think. Paper trade with discipline.
+            An AI bot built to trade Polymarket.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            PolyEngine is a live command center for Polymarket analysis, AI-ranked opportunities, copy-wallet signals, and automatic paper trading.
+            PolyEngine scans live markets, ranks every outcome, tracks sharp wallets, and runs bot trades while a 1:1 simulator lets you test the exact strategy before capital goes live.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/request-access" className="inline-flex items-center justify-center gap-2 rounded-full bg-cyanx px-6 py-3 font-semibold text-black shadow-glow hover:bg-white">
@@ -51,9 +56,9 @@ export default function LandingPage() {
           </div>
           <div className="mt-10 grid grid-cols-3 gap-3">
             {[
-              ["24/7", "VPS engine"],
-              ["0 real $", "paper-only"],
-              ["Live", "bot log"]
+              ["24/7", "Autonomous bot"],
+              ["Real + Sim", "Trading modes"],
+              ["Live", "Wallet intelligence"]
             ].map(([value, label]) => (
               <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <p className="text-2xl font-semibold text-white">{value}</p>
@@ -86,8 +91,8 @@ export default function LandingPage() {
       <section id="signals" className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid gap-5 lg:grid-cols-3">
           {[
-            ["Easy Wins", "High-confidence markets ranked by confidence, fair probability, edge, liquidity, and spread."],
-            ["Fast Wins", "The same quality filter, narrowed to soon-ending markets for faster paper-trade feedback."],
+            ["Easy Wins", "The bot's highest-probability opportunities, ranked by confidence, fair probability, edge, liquidity, and spread."],
+            ["Fast Wins", "Soon-ending markets ranked by bot liking, probability, edge, timing, and execution quality."],
             ["Live Bot Log", "Every scan, skip, entry, exit, risk block, and API issue written in plain English."]
           ].map(([title, text]) => (
             <Panel key={title}>
@@ -103,7 +108,7 @@ export default function LandingPage() {
           <p className="text-sm uppercase tracking-[0.28em] text-cyanx">Private MVP</p>
           <h2 className="mt-4 text-3xl font-semibold sm:text-5xl">Request access before the engine opens.</h2>
           <p className="mx-auto mt-5 max-w-2xl text-slate-300">
-            Early users get a paper-only terminal first. Live-money execution stays out until the system proves itself.
+            Request access to the private bot terminal. Run real execution when configured, and use the 1:1 simulator to test every strategy before scaling.
           </p>
           <Link href="/request-access" className="mt-8 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-cyanx">
             Request access

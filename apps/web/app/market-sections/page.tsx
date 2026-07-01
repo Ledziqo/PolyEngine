@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { Badge, Metric, Panel } from "@/components/ui";
-import { marketSections, sectionMarkets } from "@/lib/demo-data";
+import { getMarketSections, getMarkets } from "@/lib/api";
 
-export default function MarketSectionsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function MarketSectionsPage() {
+  const [marketSections, markets] = await Promise.all([getMarketSections(), getMarkets()]);
+  const sectionMarkets = markets.slice(0, 8);
+
   return (
     <AppShell>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -17,7 +22,7 @@ export default function MarketSectionsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-semibold">Polymarket sections</h2>
-            <p className="mt-2 text-slate-400">Category-level intelligence for browsing, scanning, and routing the paper bot.</p>
+            <p className="mt-2 text-slate-400">Category-level intelligence for browsing, scanning, and routing the bot.</p>
           </div>
           <Badge tone="cyan">Live taxonomy ready</Badge>
         </div>
@@ -53,15 +58,15 @@ export default function MarketSectionsPage() {
             </thead>
             <tbody>
               {sectionMarkets.map((market) => (
-                <tr key={market.market} className="border-t border-white/10">
+                <tr key={market.id || market.question} className="border-t border-white/10">
                   <td className="py-4"><Badge tone="violet">{market.section}</Badge></td>
-                  <td className="font-medium">{market.market}</td>
-                  <td>{market.price}</td>
-                  <td className={market.change.startsWith("+") ? "text-greenx" : "text-redx"}>{market.change}</td>
-                  <td>{market.liquidity}</td>
-                  <td>{market.volume}</td>
-                  <td>{market.confidence}%</td>
-                  <td>{market.whale}</td>
+                  <td className="font-medium">{market.question}</td>
+                  <td>{market.best_outcome?.price?.toFixed(2) || "-"}</td>
+                  <td className={(market.best_outcome?.edge || 0) >= 0 ? "text-greenx" : "text-redx"}>{market.best_outcome ? `${(market.best_outcome.edge * 100).toFixed(1)}%` : "-"}</td>
+                  <td>${Math.round(market.liquidity || 0).toLocaleString()}</td>
+                  <td>${Math.round(market.volume || 0).toLocaleString()}</td>
+                  <td>{market.best_outcome?.confidence || 0}%</td>
+                  <td>{market.preferred_pick || "-"}</td>
                 </tr>
               ))}
             </tbody>
@@ -71,3 +76,4 @@ export default function MarketSectionsPage() {
     </AppShell>
   );
 }
+

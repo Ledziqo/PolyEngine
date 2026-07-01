@@ -14,6 +14,13 @@ def demo_status() -> dict:
         "latest_signal_score": (now - timedelta(seconds=13)).isoformat(),
         "latest_bot_decision": (now - timedelta(seconds=5)).isoformat(),
         "stale": False,
+        "bot": {
+            "state": "paused",
+            "enabled": False,
+            "risk_mode": "Balanced",
+            "minimum_rating": "Strong",
+            "message": "Owner can start autonomous bot trading when ready.",
+        },
     }
 
 
@@ -27,6 +34,10 @@ def demo_opportunities() -> list[dict]:
             "fair_probability": 0.58,
             "edge": 16.0,
             "confidence": 87,
+            "rating": "Best",
+            "preferred_pick": "YES",
+            "bot_action": "Enter",
+            "scores": {"liquidity": 92, "spread": 94, "expiry": 82, "momentum": 78, "depth": 91, "wallet": 66, "risk": 84},
             "liquidity": 182400,
             "spread": 1.2,
             "ends": "18h",
@@ -40,6 +51,10 @@ def demo_opportunities() -> list[dict]:
             "fair_probability": 0.74,
             "edge": 11.0,
             "confidence": 82,
+            "rating": "Strong",
+            "preferred_pick": "NO",
+            "bot_action": "Enter",
+            "scores": {"liquidity": 84, "spread": 88, "expiry": 76, "momentum": 71, "depth": 80, "wallet": 72, "risk": 79},
             "liquidity": 94000,
             "spread": 1.7,
             "ends": "42h",
@@ -83,3 +98,4 @@ def demo_copy_signals() -> list[dict]:
         {"trader": "GoalLineGhost", "market": "Mexico vs. Ecuador", "side": "YES", "size": 857455, "entry": 0.51, "current": 0.72, "copy_score": 96, "status": "open"},
         {"trader": "CandleHammerDrums", "market": "Fed rate cut by September?", "side": "YES", "size": 48000, "entry": 0.42, "current": 0.45, "copy_score": 82, "status": "watching"},
     ]
+

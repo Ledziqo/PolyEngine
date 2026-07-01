@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
+  Bitcoin,
   Bot,
   Crown,
   Gauge,
@@ -27,6 +28,8 @@ const nav = [
   ["AI Opportunities", "/opportunities", Sparkles],
   ["Easy Wins", "/easy-wins", Target],
   ["Fast Wins", "/fast-wins", Zap],
+  ["BTC 5m", "/btc-5m", Bitcoin],
+  ["Backtests", "/backtests", Activity],
   ["Top Traders", "/traders", Crown],
   ["Copy Signals", "/copy-signals", Users],
   ["Portfolio", "/portfolio", LineChart],
@@ -72,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Engine Pulse
             </div>
             <p className="mt-2 text-xs leading-5 text-slate-400">
-              24/7 paper bot, live scoring, and Polymarket sync once the VPS engine is connected.
+              24/7 paper/real bot, trained scoring, BTC 5m signals, and Polymarket sync.
             </p>
           </div>
         </aside>
@@ -95,3 +98,4 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     </main>
   );
 }
+

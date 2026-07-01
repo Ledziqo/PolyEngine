@@ -6,10 +6,10 @@ export function Logo({ compact = false }: { compact?: boolean }) {
       <Image
         src="/brand/polyengine-logo.png"
         alt="PolyEngine"
-        width={compact ? 132 : 220}
-        height={compact ? 88 : 146}
+        width={compact ? 260 : 320}
+        height={compact ? 92 : 120}
         priority
-        className={compact ? "h-10 w-auto object-contain" : "h-14 w-auto object-contain"}
+        className={compact ? "h-12 w-auto min-w-[150px] object-contain sm:h-14 sm:min-w-[180px]" : "h-16 w-auto object-contain sm:h-20"}
       />
     </div>
   );
