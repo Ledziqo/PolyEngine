@@ -16,9 +16,10 @@ export function TerminalPreview() {
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-[1.65rem] border border-slate-200 bg-white p-5 text-slate-950 shadow-2xl shadow-slate-950/10">
-      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyanx/20 blur-3xl" />
-      <div className="absolute -bottom-20 left-1/4 h-64 w-64 rounded-full bg-violetx/15 blur-3xl" />
+    <div className="relative overflow-hidden rounded-[1.65rem] border border-cyanx/20 bg-[#eef8ff] p-5 text-slate-950 shadow-2xl shadow-cyanx/10">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(14,165,233,0.18),rgba(255,255,255,0.72)_38%,rgba(99,102,241,0.16))]" />
+      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-cyanx/35 blur-3xl" />
+      <div className="absolute -bottom-20 left-1/4 h-64 w-64 rounded-full bg-blue-500/25 blur-3xl" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyanx to-transparent" />
       <div className="relative">
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
@@ -30,7 +31,7 @@ export function TerminalPreview() {
         </div>
         <div className="mt-5 grid grid-cols-3 gap-3">
           {rows.map((row) => (
-            <div key={row.label} className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+            <div key={row.label} className="rounded-2xl border border-cyanx/15 bg-white/75 p-3 shadow-sm shadow-cyanx/5">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{row.label}</p>
               <p className={`mt-2 text-sm font-semibold ${row.tone === "green" ? "text-greenx" : row.tone === "amber" ? "text-amberx" : "text-cyanx"}`}>{row.value}</p>
               <p className="mt-1 text-xs text-slate-500">{row.meta}</p>
@@ -39,7 +40,7 @@ export function TerminalPreview() {
         </div>
         <div className="mt-5 grid gap-3">
           {opportunities.map((item) => (
-            <div key={item.market} className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+            <div key={item.market} className="rounded-2xl border border-cyanx/15 bg-white/80 p-4 shadow-sm shadow-cyanx/5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{item.market}</p>

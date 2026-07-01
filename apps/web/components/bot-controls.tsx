@@ -13,7 +13,8 @@ export function BotControls() {
     setLoading(action);
     try {
       const baseUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8000";
-      const response = await fetch(`${baseUrl}/api/bot/control`, {
+      const endpoint = process.env.NEXT_PUBLIC_ENGINE_URL ? `${baseUrl}/api/bot/control` : "/api/bot/control";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action })
