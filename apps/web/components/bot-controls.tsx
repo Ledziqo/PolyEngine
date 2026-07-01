@@ -4,9 +4,9 @@ import { useState } from "react";
 
 type BotControlAction = "enable" | "pause" | "emergency_stop";
 
-export function BotControls() {
-  const [state, setState] = useState("paused");
-  const [message, setMessage] = useState("Owner can start autonomous bot trading when ready.");
+export function BotControls({ initialState = "paused", initialMessage = "Owner can start autonomous bot trading when ready." }: { initialState?: string; initialMessage?: string }) {
+  const [state, setState] = useState(initialState);
+  const [message, setMessage] = useState(initialMessage);
   const [loading, setLoading] = useState<BotControlAction | null>(null);
 
   async function send(action: BotControlAction) {
@@ -34,7 +34,7 @@ export function BotControls() {
     <div>
       <div className="flex flex-wrap gap-3">
         <button onClick={() => send("enable")} className="rounded-xl bg-greenx px-5 py-3 font-semibold text-black hover:bg-white" disabled={loading !== null}>
-          {loading === "enable" ? "Starting..." : "Turn Bot On"}
+          {loading === "enable" ? "Starting..." : state === "enabled" ? "Bot On" : "Turn Bot On"}
         </button>
         <button onClick={() => send("pause")} className="rounded-xl border border-amberx/40 bg-amberx/10 px-5 py-3 font-semibold text-amberx hover:bg-amberx/20" disabled={loading !== null}>
           {loading === "pause" ? "Pausing..." : "Pause Bot"}
@@ -43,7 +43,7 @@ export function BotControls() {
           {loading === "emergency_stop" ? "Stopping..." : "Emergency Stop"}
         </button>
       </div>
-      <p className="mt-3 text-sm text-slate-400">State: <b className="text-cyanx">{state}</b> | {message}</p>
+      <p className="mt-3 text-sm text-slate-400">State: <b className={state === "enabled" ? "text-greenx" : "text-cyanx"}>{state}</b> | {message}</p>
     </div>
   );
 }

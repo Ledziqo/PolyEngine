@@ -44,6 +44,13 @@ SECTION_KEYWORDS = {
     "elections": ["election", "primary", "poll"],
 }
 
+PRIMARY_SECTION_KEYWORDS = {
+    "crypto": ["bitcoin", "btc", "ethereum", "eth", "crypto", "solana", "xrp"],
+    "elections": ["election", "primary", "poll"],
+    "finance": ["fed", "rate", "stock", "s&p", "nasdaq", "finance", "market"],
+    "geopolitics": ["war", "russia", "ukraine", "israel", "china", "geopolitic"],
+}
+
 
 def as_float(value: Any, default: float = 0.0) -> float:
     try:
@@ -81,6 +88,10 @@ def parse_time(value: Any) -> datetime | None:
 
 
 def section_for_market(question: str, category: str | None) -> str:
+    question_text = question.lower()
+    for slug, keywords in PRIMARY_SECTION_KEYWORDS.items():
+        if any(keyword in question_text for keyword in keywords):
+            return slug
     haystack = f"{question} {category or ''}".lower()
     for slug, keywords in SECTION_KEYWORDS.items():
         if any(keyword in haystack for keyword in keywords):
@@ -98,8 +109,11 @@ def ensure_defaults(db: Session) -> None:
         db.add(BotSetting())
     if db.query(Portfolio).count() == 0:
         db.add(Portfolio())
-    if db.query(Trader).count() == 0:
+    existing_wallets = {row.wallet for row in db.query(Trader).all()}
+    if len(existing_wallets) < 20:
         for trader in demo_traders():
+            if trader["wallet"] in existing_wallets:
+                continue
             db.add(
                 Trader(
                     wallet=trader["wallet"],
@@ -114,7 +128,9 @@ def ensure_defaults(db: Session) -> None:
                     source_quality="estimated",
                 )
             )
+            existing_wallets.add(trader["wallet"])
         db.flush()
+    if db.query(CopySignal).count() == 0:
         traders = {trader.name: trader for trader in db.query(Trader).all()}
         for signal in demo_copy_signals():
             trader = traders.get(signal["trader"])
@@ -241,11 +257,10 @@ def score_all(db: Session, limit: int = 500) -> dict:
     grouped: dict[int, list[Outcome]] = {}
     for outcome in outcomes:
         price = min(max(outcome.price or 0.5, 0.01), 0.99)
-        fair = min(max(price + min(max(outcome.liquidity / 1_000_000, 0), 0.08) - min(outcome.spread * 0.7, 0.05), 0.01), 0.99)
-        edge = fair - price
         liquidity_score = min(100, (outcome.liquidity / max(settings.min_liquidity, 1)) * 70)
         spread_score = max(0, 100 - (outcome.spread / max(settings.max_spread, 0.001)) * 45)
         expiry_score = 70
+        hours = None
         if outcome.market.end_at:
             hours = (outcome.market.end_at - datetime.utcnow()).total_seconds() / 3600
             expiry_score = 90 if 2 <= hours <= 72 else 45 if hours < 2 else 65
@@ -255,10 +270,33 @@ def score_all(db: Session, limit: int = 500) -> dict:
         risk_score = min(100, (liquidity_score + spread_score) / 2)
         model_signal = predict_outcome(db, outcome)
         model_probability = model_signal["probability"]
-        confidence = int(min(99, max(1, (model_signal["confidence"] * 0.55) + 22 + edge * 120 + liquidity_score * 0.08 + spread_score * 0.08)))
+        model_edge = model_probability - price
+        execution_edge = max(0.0, min(0.025, (liquidity_score - 55) / 1800 + (spread_score - 70) / 2500))
+        fair = min(max(price + model_edge * 0.45 + execution_edge, 0.01), 0.99)
+        edge = fair - price
+        extreme_price_penalty = 14 if price < 0.06 or price > 0.94 else 0
+        long_expiry_penalty = 10 if hours is not None and hours > 24 * 90 else 0
+        stale_penalty = 10 if not outcome.price_synced_at or outcome.price_synced_at < datetime.utcnow() - timedelta(minutes=10) else 0
+        fallback_cap = 62 if model_signal["version"] == "rule-fallback" else 88
+        confidence = int(
+            min(
+                fallback_cap,
+                max(
+                    5,
+                    model_signal["confidence"] * 0.58
+                    + max(edge, 0) * 180
+                    + liquidity_score * 0.08
+                    + spread_score * 0.06
+                    + expiry_score * 0.04
+                    - extreme_price_penalty
+                    - long_expiry_penalty
+                    - stale_penalty,
+                ),
+            )
+        )
         score = (
-            confidence * 0.26
-            + max((model_probability - price) * 100, 0) * 1.9
+            confidence * 0.32
+            + max(edge * 100, 0) * 1.2
             + liquidity_score * 0.14
             + spread_score * 0.14
             + expiry_score * 0.08
@@ -268,6 +306,10 @@ def score_all(db: Session, limit: int = 500) -> dict:
             + risk_score * 0.16
         )
         score = min(100, max(0, score))
+        if confidence < 66 or edge < 0.015 or liquidity_score < 55 or spread_score < 60:
+            score = min(score, 71)
+        if price < 0.06 and model_signal["version"] == "rule-fallback":
+            score = min(score, 57)
         rating = rating_from_score(score)
         action = bot_action_for_rating(rating, settings.risk_mode)
         outcome.fair_probability = fair
@@ -337,7 +379,6 @@ def _position_size(settings: BotSetting, port: Portfolio, outcome: Outcome) -> f
 def run_bot(db: Session) -> dict:
     settings = bot_settings(db)
     if settings.state != "enabled" or settings.emergency_stop:
-        log(db, "WATCH", "Bot is paused or emergency-stopped. No new entries.")
         return {"state": settings.state, "entered": 0, "exited": 0}
     port = portfolio(db)
     entered = 0
@@ -347,9 +388,12 @@ def run_bot(db: Session) -> dict:
         outcome = db.get(Outcome, position.outcome_id)
         if not outcome:
             continue
+        hold_minutes = (datetime.utcnow() - position.opened_at).total_seconds() / 60 if position.opened_at else 999
         pnl_pct = ((outcome.price - position.avg_price) / position.avg_price) if position.avg_price else 0
         exit_reason = None
-        if pnl_pct >= settings.take_profit:
+        if hold_minutes < 30:
+            exit_reason = None
+        elif pnl_pct >= settings.take_profit:
             exit_reason = "take profit"
         elif pnl_pct <= -settings.stop_loss:
             exit_reason = "stop loss"
@@ -370,7 +414,7 @@ def run_bot(db: Session) -> dict:
     candidates = (
         db.query(Outcome)
         .join(Market)
-        .filter(Market.active.is_(True), Market.closed.is_(False), Outcome.rating.in_(allowed), Outcome.liquidity >= settings.min_liquidity, Outcome.spread <= settings.max_spread)
+        .filter(Market.active.is_(True), Market.closed.is_(False), Outcome.rating.in_(allowed), Outcome.liquidity >= settings.min_liquidity, Outcome.spread <= settings.max_spread, Outcome.confidence >= 68, Outcome.edge >= 0.015)
         .order_by(desc(Outcome.confidence), desc(Outcome.edge), desc(Outcome.liquidity))
         .limit(10)
         .all()
@@ -380,6 +424,17 @@ def run_bot(db: Session) -> dict:
         if existing:
             continue
         if outcome.price < 0.01 or outcome.price > 0.99:
+            continue
+        if outcome.price < 0.06 and (outcome.score_breakdown or {}).get("model_version") == "rule-fallback":
+            log(db, "SKIP", f"Skipped {outcome.market.question} {outcome.name}: cheap long-shot without trained-model support.", market=outcome.market.question)
+            continue
+        recent_exit = (
+            db.query(PaperTrade)
+            .filter(PaperTrade.outcome_id == outcome.id, PaperTrade.action == "EXIT", PaperTrade.created_at >= datetime.utcnow() - timedelta(hours=6))
+            .first()
+        )
+        if recent_exit:
+            log(db, "SKIP", f"Skipped {outcome.market.question} {outcome.name}: cooldown after recent exit.", market=outcome.market.question)
             continue
         market_position = (
             db.query(Position)
@@ -405,8 +460,8 @@ def run_bot(db: Session) -> dict:
         db.add(position)
         db.flush()
         port.balance -= amount
-        db.add(PaperTrade(outcome_id=outcome.id, position_id=position.id, action="ENTER", quantity=quantity, price=fill_price, amount=amount, explanation=f"Entered {outcome.rating} setup: {outcome.confidence}% confidence, edge {outcome.edge:.2%}."))
-        log(db, "ENTER", f"Paper entered {outcome.market.question} {outcome.name} for ${amount:.2f} at {fill_price:.2f}.", market=outcome.market.question)
+        db.add(PaperTrade(outcome_id=outcome.id, position_id=position.id, action="ENTER", quantity=quantity, price=fill_price, amount=amount, explanation=f"Entered {outcome.rating}: {outcome.market.question} — {outcome.name}. Confidence {outcome.confidence}%, edge {outcome.edge:.2%}."))
+        log(db, "ENTER", f"Paper entered {outcome.market.question} — {outcome.name} for ${amount:.2f} at {fill_price:.2f}.", market=outcome.market.question)
         entered += 1
         if entered >= 2:
             break
@@ -418,6 +473,30 @@ def run_bot(db: Session) -> dict:
 def refresh_portfolio_object(db: Session) -> Portfolio:
     refresh_portfolio(db)
     return portfolio(db)
+
+
+def reset_trading_state(db: Session, starting_balance: float = 10000.0, wipe_markets: bool = False) -> dict:
+    db.query(PaperTrade).delete()
+    db.query(Position).delete()
+    db.query(BotLog).delete()
+    if wipe_markets:
+        db.query(PriceSnapshot).delete()
+        db.query(OrderBookSnapshot).delete()
+        db.query(Outcome).delete()
+        db.query(Market).delete()
+    port = portfolio(db)
+    port.balance = max(0.0, starting_balance)
+    port.realized_pnl = 0.0
+    port.unrealized_pnl = 0.0
+    port.exposure = 0.0
+    port.updated_at = datetime.utcnow()
+    settings = bot_settings(db)
+    settings.state = "paused"
+    settings.emergency_stop = False
+    settings.updated_at = datetime.utcnow()
+    db.commit()
+    log(db, "RESET", f"Reset trading state. Paper balance set to ${port.balance:,.2f}.")
+    return {"ok": True, "starting_balance": port.balance, "wipe_markets": wipe_markets}
 
 
 def market_payload(market: Market) -> dict:
@@ -447,6 +526,7 @@ def outcome_payload(outcome: Outcome | None) -> dict | None:
     return {
         "id": outcome.id,
         "name": outcome.name,
+        "label": f"{outcome.market.question} — {outcome.name}" if outcome.market else outcome.name,
         "token_id": outcome.token_id,
         "price": outcome.price,
         "fair_probability": outcome.fair_probability,
@@ -461,15 +541,16 @@ def outcome_payload(outcome: Outcome | None) -> dict | None:
     }
 
 
-def markets_payload(db: Session, section: str | None = None, limit: int = 100) -> list[dict]:
+def markets_payload(db: Session, section: str | None = None, limit: int = 500) -> list[dict]:
     query = db.query(Market).filter(Market.active.is_(True), Market.closed.is_(False))
     if section:
         query = query.filter(Market.section == section)
-    rows = query.order_by(desc(Market.rating), desc(Market.volume), desc(Market.liquidity)).limit(limit).all()
+    rows = query.order_by(desc(Market.volume), desc(Market.liquidity)).limit(max(limit, 1000)).all()
+    rows = sorted(rows, key=lambda row: ((row.score_breakdown or {}).get("overall", 0), row.volume or 0, row.liquidity or 0), reverse=True)[:limit]
     return [market_payload(row) for row in rows]
 
 
-def opportunities_payload(db: Session, mode: str | None = None, limit: int = 100) -> list[dict]:
+def opportunities_payload(db: Session, mode: str | None = None, limit: int = 250) -> list[dict]:
     query = db.query(Outcome).join(Market).filter(Market.active.is_(True), Market.closed.is_(False))
     if mode in {"easy", "fast"}:
         query = query.filter(Outcome.rating.in_(["Strong", "Best"]))
@@ -482,7 +563,7 @@ def opportunities_payload(db: Session, mode: str | None = None, limit: int = 100
             "market": row.market.question,
             "market_id": row.market.id,
             "section": row.market.section,
-            "why": f"{row.rating} setup with {row.confidence}% confidence, {row.edge:.2%} edge, {row.spread:.2%} spread.",
+            "why": f"{row.rating}: {row.market.question} — {row.name}. Confidence {row.confidence}%, edge {row.edge:.2%}, spread {row.spread:.2%}.",
         }
         for row in rows
     ]
@@ -502,6 +583,7 @@ def portfolio_payload(db: Session) -> dict:
                 "id": item.id,
                 "market": db.get(Outcome, item.outcome_id).market.question if db.get(Outcome, item.outcome_id) else "Unknown",
                 "outcome": db.get(Outcome, item.outcome_id).name if db.get(Outcome, item.outcome_id) else "Unknown",
+                "label": f"{db.get(Outcome, item.outcome_id).market.question} — {db.get(Outcome, item.outcome_id).name}" if db.get(Outcome, item.outcome_id) else "Unknown",
                 "quantity": item.quantity,
                 "avg_price": item.avg_price,
                 "current_price": item.current_price,
@@ -520,6 +602,9 @@ def portfolio_payload(db: Session) -> dict:
                 "amount": trade.amount,
                 "pnl": trade.pnl,
                 "explanation": trade.explanation,
+                "market": db.get(Outcome, trade.outcome_id).market.question if db.get(Outcome, trade.outcome_id) else "Unknown",
+                "outcome": db.get(Outcome, trade.outcome_id).name if db.get(Outcome, trade.outcome_id) else "Unknown",
+                "label": f"{db.get(Outcome, trade.outcome_id).market.question} — {db.get(Outcome, trade.outcome_id).name}" if db.get(Outcome, trade.outcome_id) else "Unknown",
                 "created_at": trade.created_at.isoformat(),
             }
             for trade in trades
@@ -559,6 +644,7 @@ def copy_signals_payload(db: Session) -> list[dict]:
             "trader": db.get(Trader, row.trader_id).name if row.trader_id and db.get(Trader, row.trader_id) else "tracked wallet",
             "market": row.market,
             "side": row.side,
+            "label": f"{row.market} — {row.side}",
             "size": row.size,
             "entry": row.entry,
             "current": row.current,

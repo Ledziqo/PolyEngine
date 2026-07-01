@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { BotControls } from "@/components/bot-controls";
+import { SyncControls } from "@/components/sync-controls";
 import { Metric, Panel, RatingBadge, Badge } from "@/components/ui";
 import { getLiveStatus, getLogs, getOpportunities, getPortfolio } from "@/lib/api";
 import { pnlCurve } from "@/lib/demo-data";
@@ -11,6 +12,8 @@ const num = (value: unknown) => Number(value || 0);
 export default async function DashboardPage() {
   const [status, portfolio, botLogs, opportunities] = await Promise.all([getLiveStatus(), getPortfolio(), getLogs(), getOpportunities()]);
   const bot = (status as any).bot || {};
+  const positions = (portfolio as any).positions || [];
+  const trades = (portfolio as any).trades || [];
 
   return (
     <AppShell>
@@ -27,7 +30,7 @@ export default async function DashboardPage() {
             <h2 className="mt-1 text-2xl font-semibold">{bot.enabled ? "Automatic bot is on" : "Automatic bot is paused"}</h2>
             <p className="mt-2 text-sm text-slate-400">{bot.message || "Waiting for engine status."}</p>
           </div>
-          <BotControls />
+          <BotControls initialState={bot.state || "paused"} initialMessage={bot.message || "Waiting for engine status."} />
         </div>
         <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Risk mode <b className="text-cyanx">{bot.risk_mode || "Balanced"}</b></div>
@@ -35,6 +38,7 @@ export default async function DashboardPage() {
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Live-money trading <b className="text-redx">Disabled</b></div>
         </div>
       </Panel>
+      <div className="mt-6"><SyncControls /></div>
       <div className="mt-6 grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
         <Panel>
           <div className="flex items-center justify-between">
@@ -68,6 +72,43 @@ export default async function DashboardPage() {
           </div>
         </Panel>
       </div>
+      <Panel className="mt-6 overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">Live paper activity</h2>
+          <Badge tone={positions.length ? "green" : "violet"}>{positions.length} open</Badge>
+        </div>
+        <div className="mt-5 grid gap-5 xl:grid-cols-2">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] text-left text-sm">
+              <thead className="text-slate-500"><tr><th className="py-3">Open bet</th><th>Size</th><th>Avg</th><th>Now</th><th>PnL</th></tr></thead>
+              <tbody>
+                {positions.slice(0, 8).map((position: any) => (
+                  <tr key={position.id} className="border-t border-white/10">
+                    <td className="py-4">{position.label || `${position.market} — ${position.outcome}`}</td>
+                    <td>${Math.round(num(position.cost_basis))}</td>
+                    <td>{num(position.avg_price).toFixed(2)}</td>
+                    <td>{num(position.current_price).toFixed(2)}</td>
+                    <td className={num(position.unrealized_pnl) >= 0 ? "text-greenx" : "text-redx"}>{num(position.unrealized_pnl).toFixed(2)}</td>
+                  </tr>
+                ))}
+                {!positions.length && <tr><td colSpan={5} className="py-8 text-slate-400">No open paper positions right now.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <div className="space-y-3">
+            {trades.slice(0, 6).map((trade: any) => (
+              <div key={trade.id} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-medium">{trade.label || `${trade.market || "Market"} — ${trade.outcome || "Outcome"}`}</p>
+                  <Badge tone={trade.action === "ENTER" ? "green" : "cyan"}>{trade.action}</Badge>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">{trade.explanation}</p>
+              </div>
+            ))}
+            {!trades.length && <p className="rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-slate-400">No paper trade history yet.</p>}
+          </div>
+        </div>
+      </Panel>
       <Panel className="mt-6 overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold">Best opportunities</h2>

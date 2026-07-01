@@ -121,6 +121,55 @@ export function SettingsForm({ initial }: { initial: Partial<SettingsPayload> })
   );
 }
 
+export function ResetEngineForm() {
+  const [message, setMessage] = useState("Reset paper trades, positions, logs, and bot state when the simulator gets messy.");
+  const [resetting, setResetting] = useState(false);
+
+  async function submit(formData: FormData) {
+    const confirmed = window.confirm("Reset PolyEngine paper state? This clears paper trades, open positions, and bot logs.");
+    if (!confirmed) return;
+    setResetting(true);
+    try {
+      const response = await fetch("/api/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          starting_balance: Number(formData.get("starting_balance") || 10000),
+          wipe_markets: formData.get("wipe_markets") === "on"
+        })
+      });
+      if (!response.ok) throw new Error("Reset failed");
+      const payload = await response.json();
+      setMessage(`Reset complete. Paper balance is now $${Number(payload.starting_balance || 0).toLocaleString()}.`);
+    } catch {
+      setMessage("Reset failed. Make sure the engine container is running.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  return (
+    <form action={submit} className="mt-8 rounded-2xl border border-redx/30 bg-redx/5 p-5">
+      <p className="text-xs uppercase tracking-[0.22em] text-redx">Reset</p>
+      <h3 className="mt-2 text-xl font-semibold text-white">Reset paper engine</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{message}</p>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <label className="grid gap-2 text-sm text-slate-300">
+          Starting balance
+          <input name="starting_balance" type="number" step="100" defaultValue="10000" className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-redx" />
+        </label>
+        <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-slate-300">
+          <input name="wipe_markets" type="checkbox" className="h-4 w-4 accent-redx" />
+          Also wipe synced markets and resync from scratch
+        </label>
+      </div>
+      <button disabled={resetting} className="mt-5 rounded-xl bg-redx px-5 py-3 font-semibold text-white hover:bg-white hover:text-black">
+        {resetting ? "Resetting..." : "Reset everything"}
+      </button>
+    </form>
+  );
+}
+
 function LiveCredentialsForm() {
   const [message, setMessage] = useState("Enter credentials only on your private VPS/domain. Saved values are encrypted and never shown again.");
   const [saving, setSaving] = useState(false);

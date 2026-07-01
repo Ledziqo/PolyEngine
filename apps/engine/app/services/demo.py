@@ -85,11 +85,34 @@ def demo_market_sections() -> list[dict]:
 
 
 def demo_traders() -> list[dict]:
-    return [
+    base = [
         {"rank": 1, "name": "mooseborzoi", "wallet": "0x9a6...62db", "pnl": 784057, "roi": 38.4, "volume": 3511904, "win_rate": 71, "gain_loss": 2.8, "positions": 18, "active_value": 776193, "copy_score": 94, "specialty": "Sports"},
         {"rank": 2, "name": "GoalLineGhost", "wallet": "0x42c...91aa", "pnl": 656675, "roi": 44.1, "volume": 2347117, "win_rate": 76, "gain_loss": 3.2, "positions": 11, "active_value": 857455, "copy_score": 96, "specialty": "Football"},
         {"rank": 3, "name": "surfandturf", "wallet": "0x8f1...ac40", "pnl": 562550, "roi": 29.6, "volume": 1517842, "win_rate": 68, "gain_loss": 2.1, "positions": 23, "active_value": 955292, "copy_score": 87, "specialty": "Live sports"},
     ]
+    names = [
+        "MacroKnife", "CandleAtlas", "EconFalcon", "SharpLedger", "VolatilityDesk", "NewsQuant",
+        "DepthReader", "OddsPilot", "CatalystCore", "LiquidityLane", "EventDriven", "CryptoTape",
+        "PolicyEdge", "MarketPulse", "FlowHunter", "SignalVault", "GammaScout"
+    ]
+    for index, name in enumerate(names, start=4):
+        base.append(
+            {
+                "rank": index,
+                "name": name,
+                "wallet": f"0x{index:02x}{index * 731:04x}...{index * 991:04x}",
+                "pnl": max(42000, 520000 - index * 21750),
+                "roi": round(max(8.5, 34 - index * 0.9), 1),
+                "volume": max(185000, 1400000 - index * 42000),
+                "win_rate": max(54, 74 - index // 2),
+                "gain_loss": round(max(1.2, 3.0 - index * 0.06), 2),
+                "positions": 6 + (index % 18),
+                "active_value": max(50000, 710000 - index * 23000),
+                "copy_score": max(70, 94 - index),
+                "specialty": ["Crypto", "Politics", "Macro", "Sports", "Breaking"][index % 5],
+            }
+        )
+    return base
 
 
 def demo_copy_signals() -> list[dict]:

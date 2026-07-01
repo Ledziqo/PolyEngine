@@ -15,7 +15,10 @@ export default async function HistoryPage() {
         <div className="mt-5 grid gap-3">
           {trades.map((trade: any) => (
             <div key={trade.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p>{trade.explanation}</p>
+              <div>
+                <p className="font-medium">{trade.label || `${trade.market || "Market"} — ${trade.outcome || "Outcome"}`}</p>
+                <p className="mt-1 text-sm text-slate-400">{trade.explanation}</p>
+              </div>
               <Badge tone={trade.action === "ENTER" ? "green" : "cyan"}>{trade.action}</Badge>
             </div>
           ))}

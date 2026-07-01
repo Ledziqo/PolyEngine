@@ -21,13 +21,13 @@ RATING_LABELS = {
 
 
 def rating_from_score(score: float) -> str:
-    if score >= 88:
+    if score >= 92:
         return "Best"
-    if score >= 78:
+    if score >= 82:
         return "Strong"
-    if score >= 68:
+    if score >= 72:
         return "Good"
-    if score >= 55:
+    if score >= 58:
         return "Watch"
     if score >= 40:
         return "Weak"

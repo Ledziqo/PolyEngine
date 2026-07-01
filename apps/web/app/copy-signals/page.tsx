@@ -23,7 +23,7 @@ export default async function CopySignalsPage() {
               <div key={`${signal.trader}-${signal.market}`} className="rounded-2xl border border-white/10 bg-black/20 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold">{signal.market}</h3>
+                    <h3 className="font-semibold">{signal.label || `${signal.market} — ${signal.side}`}</h3>
                     <p className="mt-1 text-sm text-slate-400">{signal.trader} bought {signal.side} with {signal.size} exposure</p>
                   </div>
                   <Badge tone={(signal.copy_score || 0) > 90 ? "green" : "cyan"}>Copy {signal.copy_score || 75}</Badge>

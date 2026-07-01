@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/app-shell";
 import { BotControls } from "@/components/bot-controls";
-import { SettingsForm } from "@/components/settings-form";
+import { ResetEngineForm, SettingsForm } from "@/components/settings-form";
 import { SyncControls } from "@/components/sync-controls";
 import { Badge, Panel } from "@/components/ui";
 import { getLiveOrders, getLiveStatus } from "@/lib/api";
@@ -36,9 +36,10 @@ export default async function SettingsPage() {
             <b className="mt-1 block text-white">{live.dry_run ? "Enabled" : "Disabled"}</b>
           </div>
         </div>
-        <div className="mt-6"><BotControls /></div>
+        <div className="mt-6"><BotControls initialState={bot.state || "paused"} initialMessage={bot.message || "Waiting for engine status."} /></div>
         <div className="mt-6"><SyncControls /></div>
         <SettingsForm initial={bot} />
+        <ResetEngineForm />
       </Panel>
       <Panel className="mt-6">
         <h3 className="text-xl font-semibold">Live Order Audit</h3>

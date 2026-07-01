@@ -25,6 +25,7 @@ from app.services.terminal import (
     score_all,
     sync_markets,
     sync_order_books,
+    reset_trading_state,
     traders_payload,
 )
 from app.services.backtesting import backtest_detail_payload, backtest_payload, run_backtest
@@ -75,6 +76,11 @@ class LiveCredentialsRequest(BaseModel):
     polymarket_api_key: str | None = None
     polymarket_api_secret: str | None = None
     polymarket_api_passphrase: str | None = None
+
+
+class ResetRequest(BaseModel):
+    starting_balance: float = 10000
+    wipe_markets: bool = False
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -161,8 +167,8 @@ def update_bot_settings(payload: BotSettingsRequest, db: Session = Depends(get_d
 
 @router.post("/sync/all")
 async def sync_all_route(db: Session = Depends(get_db)) -> dict:
-    markets_result = await sync_markets(db, limit=250)
-    books_result = await sync_order_books(db, limit=120)
+    markets_result = await sync_markets(db, limit=1000)
+    books_result = await sync_order_books(db, limit=300)
     try:
         btc_result = await sync_btc5m_windows(db, limit=20)
     except Exception as exc:
@@ -174,6 +180,11 @@ async def sync_all_route(db: Session = Depends(get_db)) -> dict:
     score_result = score_all(db, limit=500)
     portfolio_result = refresh_portfolio(db)
     return {"markets": markets_result, "order_books": books_result, "btc5m": btc_result, "traders": trader_result, "score": score_result, "portfolio": portfolio_result}
+
+
+@router.post("/reset")
+def reset_route(payload: ResetRequest, db: Session = Depends(get_db)) -> dict:
+    return reset_trading_state(db, starting_balance=payload.starting_balance, wipe_markets=payload.wipe_markets)
 
 
 @router.post("/sync/markets")

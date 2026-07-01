@@ -106,13 +106,17 @@ def predict_outcome(db: Session, outcome: Outcome) -> dict:
     model_row = active_model(db)
     features = feature_vector(outcome)
     if not model_row or not Path(model_row.artifact_path).exists():
-        probability = min(0.98, max(0.02, 0.5 + max(outcome.edge, -0.2) + ((outcome.score_breakdown or {}).get("risk", 50) - 50) / 250))
+        market_price = float(outcome.price or 0.5)
+        execution_quality = ((outcome.score_breakdown or {}).get("risk", 50) - 50) / 1000
+        probability = min(0.92, max(0.08, market_price + execution_quality))
         version = "rule-fallback"
+        confidence = int(max(12, min(58, 34 + abs(probability - market_price) * 140 + ((outcome.score_breakdown or {}).get("risk", 50) - 50) * 0.18)))
     else:
         artifact = joblib.load(model_row.artifact_path)
         vector = np.array([[features[name] for name in artifact["features"]]], dtype=float)
         probability = float(artifact["model"].predict_proba(vector)[0][1])
         version = model_row.version
-    confidence = int(max(1, min(99, abs(probability - 0.5) * 180 + 50)))
+        quality_cap = 92 if model_row.training_rows >= 400 and model_row.validation_auc >= 0.6 else 78
+        confidence = int(max(20, min(quality_cap, abs(probability - 0.5) * 120 + 42 + model_row.precision * 18)))
     db.add(ModelPrediction(outcome_id=outcome.id, model_version=version, horizon="1h", probability=probability, confidence=confidence, features=features))
     return {"probability": probability, "confidence": confidence, "version": version, "features": features}

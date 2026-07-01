@@ -23,9 +23,9 @@ async def main() -> None:
         try:
             now = datetime.utcnow()
             if last_market_sync is None or (now - last_market_sync).total_seconds() >= 600:
-                await sync_markets(db, limit=250)
+                await sync_markets(db, limit=1000)
                 last_market_sync = now
-            await sync_order_books(db, limit=100)
+            await sync_order_books(db, limit=300)
             await sync_btc5m_windows(db, limit=20)
             score_all(db, limit=500)
             run_bot(db)
