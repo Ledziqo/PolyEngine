@@ -1,0 +1,13 @@
+{
+  "name": "polyengine-v2",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "build": "npm --workspace apps/web run build",
+    "lint": "npm --workspace apps/web run lint",
+    "engine:dev": "cd apps/engine && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+  }
+}
